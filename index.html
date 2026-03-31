@@ -19,6 +19,7 @@
         #ios-alert { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
         input[type=range] { -webkit-appearance: none; background: rgba(255,255,255,0.1); height: 3px; border-radius: 5px; outline: none; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 12px; width: 12px; border-radius: 50%; background: #fff; cursor: pointer; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
+        .admin-panel-top { border-bottom: 1px solid rgba(10, 132, 255, 0.2); margin-bottom: 20px; padding-bottom: 20px; }
     </style>
 </head>
 <body class="flex items-center justify-center p-6">
@@ -39,14 +40,12 @@
             <h1 class="text-3xl font-black italic tracking-tighter">HM <span class="text-blue-500">VOICE</span></h1>
             <p id="auth-title" class="text-xs text-white/40 mt-1 uppercase tracking-widest font-bold">Selamat Datang!!</p>
         </div>
-
         <div id="login-form" class="space-y-4">
             <input type="text" id="user_id" placeholder="Username" class="w-full p-4 input-modern font-bold">
             <input type="password" id="user_pass" placeholder="Password" class="w-full p-4 input-modern font-bold">
             <button onclick="handleAuth()" class="w-full p-4 bg-blue-600 rounded-2xl font-black text-sm uppercase shadow-lg shadow-blue-600/20 active:scale-95 transition-all">Masuk Sekarang</button>
             <p class="text-center text-xs text-white/40">Belum punya akun? <span onclick="toggleAuth(true)" class="text-blue-500 font-bold cursor-pointer">Daftar</span></p>
         </div>
-
         <div id="register-form" class="space-y-4 hidden">
             <input type="text" id="reg_id" placeholder="Buat Username" class="w-full p-4 input-modern font-bold">
             <input type="password" id="reg_pass" placeholder="Buat Password" class="w-full p-4 input-modern font-bold">
@@ -57,6 +56,13 @@
 
     <div id="room-screen" class="w-full max-w-[380px] hidden space-y-6">
         <div class="ios-blur p-8 shadow-2xl">
+            <div id="admin-access-panel" class="hidden admin-panel-top">
+                <p class="text-[9px] font-black uppercase text-blue-500 mb-3 tracking-[0.2em]">Master Room Access</p>
+                <div id="active-rooms-list" class="space-y-2 max-h-[120px] overflow-y-auto pr-2">
+                    <p class="text-[10px] text-white/20 italic text-center">Memantau server...</p>
+                </div>
+            </div>
+
             <div class="flex items-center justify-between mb-8">
                 <div>
                     <h2 class="text-2xl font-black">Dashboard</h2>
@@ -72,13 +78,11 @@
                     <input type="number" id="room_id" placeholder="Ketik ID Room" class="w-full p-6 input-modern text-center font-black text-3xl text-blue-500 placeholder:text-white/5">
                     <button onclick="joinRoom()" class="w-full mt-4 p-4 bg-blue-600 rounded-xl font-black text-xs uppercase shadow-lg active:scale-95 transition-all">Gabung ke Room</button>
                 </div>
-
                 <div class="flex items-center gap-4">
                     <div class="flex-1 h-[1px] bg-white/5"></div>
                     <span class="text-[8px] font-black text-white/20 uppercase tracking-[0.3em]">Atau</span>
                     <div class="flex-1 h-[1px] bg-white/5"></div>
                 </div>
-
                 <button onclick="createNewRoom()" class="w-full p-5 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-3 font-black text-xs uppercase active:scale-95 transition-all">
                     <i class="fa-solid fa-plus-circle text-blue-500"></i> Buat Room Baru
                 </button>
@@ -95,9 +99,7 @@
             </div>
             <button onclick="toggleSettings()" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10"><i class="fa-solid fa-sliders text-xs"></i></button>
         </div>
-
         <div id="user-grid" class="flex-1 grid grid-cols-2 gap-3 overflow-y-auto py-2 content-start"></div>
-
         <div id="volume-panel" class="hidden ios-blur p-6 mb-4">
             <p class="text-[10px] font-black uppercase tracking-widest mb-4 text-blue-500">Settings Volume Suara</p>
             <div class="flex items-center gap-4">
@@ -106,7 +108,6 @@
                 <i class="fa-solid fa-volume-high text-xs opacity-40"></i>
             </div>
         </div>
-
         <div class="ios-blur p-6 flex justify-around items-center mb-6 shadow-2xl border-t border-white/10">
             <button onclick="toggleMute()" id="mute-btn" class="w-16 h-16 rounded-[24px] bg-white/5 flex items-center justify-center text-xl transition-all active:scale-90 border border-white/5">
                 <i class="fa-solid fa-microphone"></i>
@@ -121,7 +122,6 @@
         const firebaseConfig = { databaseURL: "https://cracker-generator-default-rtdb.firebaseio.com" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
         let localStream, currentUser, currentRoom, userRole = "user";
         const hmProfile = "https://files.catbox.moe/4y3suf.png";
         const defaultProfile = "https://ui-avatars.com/api/?background=1c1c1e&color=fff&bold=true&name=";
@@ -132,7 +132,6 @@
             document.getElementById('ios-alert').style.display = 'flex';
         }
         function closeAlert() { document.getElementById('ios-alert').style.display = 'none'; }
-
         function toggleAuth(isReg) {
             document.getElementById('login-form').classList.toggle('hidden', isReg);
             document.getElementById('register-form').classList.toggle('hidden', !isReg);
@@ -143,7 +142,6 @@
             const user = document.getElementById('reg_id').value.trim();
             const pass = document.getElementById('reg_pass').value.trim();
             if(!user || !pass) return showAlert("Gagal", "Isi dulu semua kolomnya.");
-            
             db.ref('users/' + user).once('value', s => {
                 if(s.exists()) return showAlert("Maaf", "Username ini sudah ada yang pake.");
                 const isHM = user.toUpperCase().includes("HM_") || user.toUpperCase().includes("ADMIN_");
@@ -162,38 +160,66 @@
             const user = document.getElementById('user_id').value.trim();
             const pass = document.getElementById('user_pass').value.trim();
             db.ref('users/' + user).once('value', s => {
-                if(!s.exists()) return showAlert("Error", "Akun gak terdaftar, bikin dulu lah.");
-                if(s.val().pass !== pass) return showAlert("Gagal", "Password lu salah!");
-                
+                if(!s.exists()) return showAlert("Error", "Akun gak terdaftar.");
+                if(s.val().pass !== pass) return showAlert("Gagal", "Password salah!");
                 currentUser = user;
                 userRole = s.val().role;
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('room-screen').classList.remove('hidden');
+                if(userRole === "staff") {
+                    document.getElementById('admin-access-panel').classList.remove('hidden');
+                    listenActiveRooms();
+                }
             });
+        }
+
+        function listenActiveRooms() {
+            db.ref('rooms').on('value', s => {
+                const list = document.getElementById('active-rooms-list');
+                list.innerHTML = "";
+                if(!s.exists()) {
+                    list.innerHTML = '<p class="text-[10px] text-white/10 text-center uppercase font-bold">Tidak Ada Room Aktif</p>';
+                    return;
+                }
+                s.forEach(child => {
+                    const rid = child.key;
+                    const users = child.val().users ? Object.keys(child.val().users).length : 0;
+                    list.innerHTML += `
+                        <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 active:scale-95 transition-all">
+                            <div>
+                                <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest">Room ID: ${rid}</p>
+                                <p class="text-[7px] text-white/30 font-bold uppercase">${users} Terhubung</p>
+                            </div>
+                            <button onclick="adminJoin('${rid}')" class="px-3 py-1.5 bg-blue-600 rounded-lg text-[8px] font-black uppercase">Master Join</button>
+                        </div>`;
+                });
+            });
+        }
+
+        function adminJoin(rid) {
+            document.getElementById('room_id').value = rid;
+            joinRoom();
         }
 
         function createNewRoom() {
             const rid = Math.floor(1000 + Math.random() * 9000);
             db.ref('rooms/' + rid).set({ owner: currentUser, active: true }).then(() => {
                 document.getElementById('room_id').value = rid;
-                showAlert("Berhasil", "Room " + rid + " udah dibuat. Gas join!");
+                showAlert("Berhasil", "Room " + rid + " dibuat.");
             });
         }
 
         function joinRoom() {
             const rid = document.getElementById('room_id').value.trim();
             if(!rid) return showAlert("Sabar", "ID Room nya isi dulu.");
-
             db.ref('rooms/' + rid).once('value', s => {
-                if(!s.exists()) return showAlert("Kosong", "Room gak ketemu di database.");
-                
+                if(!s.exists()) return showAlert("Kosong", "Room gak ketemu.");
                 navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
                     localStream = stream;
                     currentRoom = rid;
                     document.getElementById('room-screen').classList.add('hidden');
                     document.getElementById('voice-screen').classList.remove('hidden');
                     document.getElementById('room-display').innerText = "ROOM: " + rid;
-                    
                     db.ref('rooms/' + rid + '/users/' + currentUser).set({
                         avatar: (currentUser.toUpperCase().includes("HM_") || currentUser.toUpperCase().includes("ADMIN_")) ? hmProfile : defaultProfile + currentUser,
                         muted: false,
@@ -201,11 +227,10 @@
                         vol: 1
                     });
                     listenUsers();
-                }).catch(() => showAlert("Mic Error", "Cek izin mic di HP lu!!"));
+                }).catch(() => showAlert("Mic Error", "Cek izin mic!"));
             });
         }
 
-        // Benerin card di sini biar pendek dan ada icon volumenya
         function listenUsers() {
             db.ref('rooms/' + currentRoom + '/users').on('value', s => {
                 const grid = document.getElementById('user-grid');
@@ -213,22 +238,19 @@
                 s.forEach(child => {
                     const u = child.val();
                     const name = child.key;
-                    const isStaff = u.role === "staff";
                     grid.innerHTML += `
                         <div class="user-card flex flex-col items-center p-4 ios-blur ${u.muted ? 'opacity-30' : 'speaking'}">
                             <div class="relative mb-3">
                                 <img src="${u.avatar}" class="w-16 h-16 rounded-[22px] object-cover border border-white/10">
-                                ${isStaff ? '<div class="absolute -top-1 -right-1 bg-blue-600 px-1.5 py-0.5 rounded-lg text-[6px] font-black border border-black">STAFF</div>' : ''}
+                                ${u.role === "staff" ? '<div class="absolute -top-1 -right-1 bg-blue-600 px-1.5 py-0.5 rounded-lg text-[6px] font-black border border-black">STAFF</div>' : ''}
                             </div>
                             <span class="text-[10px] font-black uppercase tracking-widest text-white/80">${name}</span>
-                            
                             <div class="mt-3 w-full flex items-center gap-2 bg-white/5 p-2 rounded-xl">
                                 <i class="fa-solid fa-volume-off text-[8px] opacity-30"></i>
                                 <input type="range" class="flex-1" data-user="${name}" min="0" max="1" step="0.1" value="${u.vol || 1}">
                                 <i class="fa-solid fa-volume-high text-[8px] opacity-30"></i>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 });
             });
         }
@@ -240,16 +262,7 @@
             db.ref('rooms/' + currentRoom + '/users/' + currentUser).update({ muted: !track.enabled });
         }
 
-        function toggleSettings() {
-            const panel = document.getElementById('volume-panel');
-            panel.classList.toggle('hidden');
-        }
-
-        document.getElementById('master-volume').addEventListener('input', (e) => {
-            const v = e.target.value;
-            const audios = document.querySelectorAll('audio');
-            audios.forEach(a => a.volume = v);
-        });
+        function toggleSettings() { document.getElementById('volume-panel').classList.toggle('hidden'); }
 
         function leaveRoom() {
             if(currentRoom) db.ref('rooms/' + currentRoom + '/users/' + currentUser).remove();
